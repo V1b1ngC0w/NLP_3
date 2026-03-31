@@ -6,6 +6,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
+import math
 
 from preprocessing_normalisation import preprocess, normalise
 from utils import (
@@ -141,15 +142,31 @@ def main() -> None:
             "roberta-base",
             num_labels=4
             ).to(device)
-        
-    trainer = train_transformer(model, tr_train_dataset, tr_dev_dataset)
-    trainer.train()
-
-    prediction_output = trainer.predict(tr_test_dataset)
-    logits = prediction_output.predictions
-    roberta_preds = np.argmax(logits, axis=1).tolist()
     
-    calculate_metrics(real=test, pred=roberta_preds, model="RoBERTa")
+    # Label noise sensitivity
+    percentage_sizes = [0.2, 0.4, 0.6, 0.8, 1]
+    train_length = len(tr_train_dataset)
+
+    for p in percentage_sizes:
+        pass
+        print(f"Training with {p*100}% of the dataset")
+
+        #change trainset size
+        train_size = math.floor(p*train_length)
+        subset_train = tr_train_dataset.shuffle(seed=SEED).select(range(train_size))
+
+        trainer = train_transformer(model, subset_train, tr_dev_dataset)
+        trainer.train()
+
+        prediction_output = trainer.predict(tr_test_dataset)
+        logits = prediction_output.predictions
+        roberta_preds = np.argmax(logits, axis=1).tolist()
+    
+        calculate_metrics(real=test, pred=roberta_preds, model=f"RoBERTa {p*100}% of the dataset")
+
+        del trainer
+        torch.cuda.empty_cache()
+    
     
 
 
