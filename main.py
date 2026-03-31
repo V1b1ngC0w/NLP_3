@@ -148,7 +148,6 @@ def main() -> None:
     train_length = len(tr_train_dataset)
 
     for p in percentage_sizes:
-        pass
         print(f"Training with {p*100}% of the dataset")
 
         #change trainset size
