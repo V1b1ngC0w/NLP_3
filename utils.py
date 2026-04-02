@@ -12,7 +12,7 @@ import pandas as pd
 from transformers import AutoTokenizer
 
 SEED = 69
-LABELS = {0: "World", 1: "Sports", 2: "Business", 3: "Sci/Tech"}
+LABELS = {1: "World", 2: "Sports", 3: "Business", 4: "Sci/Tech"}
 BATCH_SIZE = 64
 MAX_LENGTH = 128
 LSTM_tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
@@ -32,7 +32,7 @@ def tokenize_data(texts, tokenizer: AutoTokenizer) -> AutoTokenizer:
     )
 
 
-def calculate_metrics(real: pd.DataFrame, pred: list,  model: str) -> None:
+def calculate_metrics(real: pd.DataFrame, pred: list,  model: str, print_err: bool = False) -> None:
     print(f"\n{model} metrics:\n")
     print(f"Accuracy: {accuracy_score(real['label'], pred):.3f}")
     print(f"F1-Score: {f1_score(real['label'], pred, average='macro'):.3f}")
@@ -57,13 +57,14 @@ def calculate_metrics(real: pd.DataFrame, pred: list,  model: str) -> None:
     ]
 
     print(f"\nTotal Errors: {len(errors)}")
-    print("Displaying first 20 misclassifications:\n")
-
-    for i, doc in errors.head(20).iterrows():
-        print(f"Article number {i}:")
-        print(f"TRUE: {doc['true_label']} | PRED: {doc['pred_label']}")
-        print(f"TEXT: {doc['text']}")
-        print("-" * 80)
+    if print_err:
+        print("Displaying first 20 misclassifications:\n")
+    
+        for i, doc in errors.head(20).iterrows():
+            print(f"Article number {i}:")
+            print(f"TRUE: {doc['true_label']} | PRED: {doc['pred_label']}")
+            print(f"TEXT: {doc['text']}")
+            print("-" * 80)
 
 def plot_learning_curves(history: dict, model: str):
 

@@ -184,12 +184,16 @@ def train_transformer(
 
     training_args = TrainingArguments(
     eval_strategy="epoch",
+    save_strategy="epoch",
     logging_strategy="epoch",
     learning_rate=lr,
     per_device_train_batch_size=train_batch_size,
     per_device_eval_batch_size=eval_batch_size,
     num_train_epochs=epochs,
     weight_decay=weight_decay,
+    load_best_model_at_end=True,
+    metric_for_best_model="eval_loss",
+    save_total_limit=1 # save only one model
     )
 
     return Trainer(
