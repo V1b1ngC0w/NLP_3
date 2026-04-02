@@ -42,9 +42,9 @@ def run_tokenizer(
     
     print("Tokenizing datasets...")
 
-    X_train = tokenize_data(train["text"], tokenizer)
-    X_dev = tokenize_data(dev["text"], tokenizer)
-    X_test = tokenize_data(test["text"], tokenizer)
+    X_train = tokenize_data(train["description"], tokenizer)
+    X_dev = tokenize_data(dev["description"], tokenizer)
+    X_test = tokenize_data(test["description"], tokenizer)
 
     return X_train, X_dev, X_test
 
@@ -52,31 +52,49 @@ def run_tokenizer(
 def main() -> None:
 
     # download the AG news dataset
-    dataset_dict = load_dataset("SetFit/ag_news")
+    dataset_dict = load_dataset("sh0416/ag_news")
     """
     Dataset downloads the test and train split separately
     It save them in a dictionary where the first element
     is the train dataset, and the second one is the test dataset
 
     they are both Dataset objects containing:
-        features: text label label_text
+        features:  label title description
         num_rows: int
     """
     # Preprocessing
-    train_full = dataset_dict["train"].to_pandas()
+    train_set = dataset_dict["train"].to_pandas()
     test = dataset_dict["test"].to_pandas()
-    train_full["text"] = train_full["text"].apply(preprocess).apply(normalise)
-    test["text"] = test["text"].apply(preprocess).apply(normalise)
+
+    train_set["description"] = train_set["description"].apply(preprocess).apply(normalise)
+    train_set["title"] = train_set["title"].apply(preprocess).apply(normalise)
+    train_title = train_set["title"]
+    train_full = train_set["title"] + train_set["description"] 
+
+    test["description"] = test["description"].apply(preprocess).apply(normalise)
+    test["title"] = test["title"].apply(preprocess).apply(normalise)
+    test = test["title"] + test["description"] 
+
 
     print("Loaded data head (before split):")
     print(train_full.head(5))
+    print("TITLE ONLY")
+    print(train_set["title"].head(5))
 
     # split the training dataset into train and validation
     train, dev = train_test_split(
         train_full,
         test_size=0.16,
         random_state=SEED,
-        stratify=train_full["label"]
+        stratify=train["label"]
+    )
+
+    #! This is the split for title only model
+    train_title_only, dev_title_only = train_test_split(
+        train_title,
+        test_size=0.16
+        random_state=SEED
+        stratify=train["label"]
     )
 
     print(f"Split sizes: Train({len(train)}), Dev({len(dev)}), Test({len(test)})")
@@ -148,6 +166,7 @@ def main() -> None:
     train_length = len(tr_train_dataset)
 
     for p in percentage_sizes:
+        pass
         print(f"Training with {p*100}% of the dataset")
 
         #change trainset size

@@ -2,7 +2,6 @@ import re
 import contractions
 import pandas as pd
 from num2words import num2words
-from nltk.stem import WordNetLemmatizer
 
 
 def preprocess(text: str) -> str:
@@ -27,8 +26,6 @@ def preprocess(text: str) -> str:
 
 
 def normalise(text: str) -> str:
-
-    lemmatizer = WordNetLemmatizer()
 
     def lowerise(text):
         """
@@ -59,20 +56,6 @@ def normalise(text: str) -> str:
         ])
         return text
 
-    def lematize_words(text: str) -> str:
-        """
-        Function that lemmatizes each word in a string of text
-        E.g. studies -> study
-        """
-
-        if pd.isna(text):
-            return text
-
-        words = str(text).split()
-        lemmatized_words = [lemmatizer.lemmatize(word) for word in words]
-
-        return " ".join(lemmatized_words)
-
     def numbers_to_words(text: str) -> str:
         """
         Function that changes numerically represented numbers to
@@ -91,6 +74,5 @@ def normalise(text: str) -> str:
     text = numbers_to_words(text)
     text = remove_punctuation(text)
     text = remove_common_words(text)
-    text = lematize_words(text)
 
     return text
