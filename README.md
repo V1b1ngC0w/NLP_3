@@ -23,3 +23,4 @@ Now you are ready to run the program, which can be done with the command:
 ~~~
 python main.py
 ~~~
+When the program is running, it will ask if you want it to train the models from scratch. Since the transformers could not be uploaded to git, responding with 'y' or 'n' doesn't change the outcome, but an answer is needed for the program to start.
